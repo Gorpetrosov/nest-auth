@@ -57,7 +57,7 @@ export class AuthService {
     agent: string,
   ): Promise<LoginTokenInterface> {
     const token = await this.prismaService.token
-      .findUnique({
+      .delete({
         where: {
           token: refreshToken,
         },
@@ -66,15 +66,7 @@ export class AuthService {
         this.logger.error(err);
         return null;
       });
-    if (!token) {
-      throw new UnauthorizedException('Unauthorized user');
-    }
-    await this.prismaService.token.delete({
-      where: {
-        token: refreshToken,
-      },
-    });
-    if (new Date(token.expired) < new Date()) {
+    if (!token || new Date(token.expired) < new Date()) {
       throw new UnauthorizedException('Unauthorized user');
     }
     const user = await this.userService.findOne(token.userId);

@@ -6,21 +6,30 @@ import {
   NotFoundException,
   Param,
   ParseUUIDPipe,
+  UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
 import { UserService } from '@user/user.service';
 import { UserResponse } from '@user/responses';
-import { CurrentUser } from '@common/decorators';
-import { User } from '@prisma/client';
+import { CurrentUser, Roles } from '@common/decorators';
+import { Role } from '@prisma/client';
 import { JwtPayload } from '@auth/interfaces';
+import { RolesGuard } from '@auth/guards/role-guard';
 
 @Controller('user')
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
+  @UseGuards(RolesGuard)
+  @Roles(Role.USER)
+  @Get('me')
+  async me(@CurrentUser() user: JwtPayload): Promise<JwtPayload> {
+    return user;
+  }
+
   @UseInterceptors(ClassSerializerInterceptor)
   @Get(':idOrEmail')
-  async findUser(@Param('idOrEmail') idOrEmail: string) {
+  async findUser(@Param('idOrEmail') idOrEmail: string): Promise<UserResponse> {
     const user = await this.userService.findOne(idOrEmail);
     if (!user) {
       throw new NotFoundException("User doesn't exist");

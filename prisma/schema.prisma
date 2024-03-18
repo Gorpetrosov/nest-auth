@@ -16,7 +16,8 @@ datasource db {
 model User {
   id String @id @default(uuid())
   email String @unique
-  password String
+  password String?
+  provider Providers @default(LOCAL)
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
   roles Role[]
@@ -36,4 +37,10 @@ model Token {
 enum Role {
   ADMIN
   USER
+}
+
+enum Providers {
+  LOCAL
+  GOOGLE
+  YANDEX
 }

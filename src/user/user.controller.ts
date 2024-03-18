@@ -1,4 +1,5 @@
 import {
+  Body,
   ClassSerializerInterceptor,
   Controller,
   Delete,
@@ -6,13 +7,14 @@ import {
   NotFoundException,
   Param,
   ParseUUIDPipe,
+  Put,
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
 import { UserService } from '@user/user.service';
 import { UserResponse } from '@user/responses';
 import { CurrentUser, Roles } from '@common/decorators';
-import { Role } from '@prisma/client';
+import { Role, User } from '@prisma/client';
 import { JwtPayload } from '@auth/interfaces';
 import { RolesGuard } from '@auth/guards/role-guard';
 
@@ -47,5 +49,12 @@ export class UserController {
       throw new NotFoundException(`User with ${id} doesn't exist`);
     }
     return userId;
+  }
+
+  @UseInterceptors(ClassSerializerInterceptor)
+  @Put()
+  async updateUser(@Body() body: Partial<User>) {
+    const user = await this.userService.save(body);
+    return new UserResponse(user);
   }
 }

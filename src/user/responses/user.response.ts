@@ -12,6 +12,9 @@ export class UserResponse implements User {
   @Exclude()
   createdAt: Date;
 
+  @Exclude()
+  isBlocked: boolean;
+
   updatedAt: Date;
 
   roles: Role[];
